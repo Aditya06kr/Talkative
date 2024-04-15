@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import RegisterOrLogin from "./components/RegisterOrLogin";
-import Chat from "./Chat";
+import Chat from "./components/Chat";
 import { UserContext } from "./UserContext";
 
 const Routes = () => {

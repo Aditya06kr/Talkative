@@ -6,6 +6,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
+const ws = require("ws");
 
 const mongoUrl = process.env.MONGO_URL;
 const secret = "asjdfn238rn43gi4b40gn3";
@@ -100,4 +101,41 @@ app.get("/profile", (req, res) => {
   }
 });
 
-app.listen("4040");
+const server = app.listen(4040);
+
+const wss = new ws.WebSocketServer({ server });
+wss.on("connection", (connection, req) => {
+  const cookies = req.headers.cookie;
+  if (cookies) {
+    const cookieArray = cookies.split(";");
+    cookieArray.forEach((cookie) => {
+      const token = cookie.trim().split("=")[1];
+      if (token) {
+        jwt.verify(token, secret, {}, (err, info) => {
+          if (err) throw err;
+          const { username, id } = info;
+          connection.username = username;
+          connection.id = id;
+        });
+      }
+    });
+  }
+
+  connection.on("message", (message) => {
+    const messageString = JSON.parse(message.toString());
+    const { recipient, text } = messageString;
+    if (recipient && text) {
+      [...wss.clients]
+        .filter((user) => user.id == recipient)
+        .forEach((c) => c.send(JSON.stringify({ text })));
+    }
+  });
+
+  [...wss.clients].forEach((client) => {
+    const onlineUsers = [...wss.clients].map((c) => ({
+      id: c.id,
+      username: c.username,
+    }));
+    client.send(JSON.stringify({ online: onlineUsers }));
+  });
+});
