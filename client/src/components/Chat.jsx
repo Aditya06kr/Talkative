@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import { UserContext } from "../UserContext";
 import Logo from "./Logo";
+import {uniqBy} from "lodash";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
@@ -9,6 +10,7 @@ const Chat = () => {
   const [userId, setUserId] = useState(null);
   const { userInfo } = useContext(UserContext);
   const [message, setMessage] = useState();
+  const [conversation, setConversation] = useState([]);
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:4040");
     setWs(ws);
@@ -28,9 +30,8 @@ const Chat = () => {
     const messageData = JSON.parse(e.data);
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
-    }
-    else if("message" in messageData){
-      console.log(messageData);
+    }else if("text" in messageData){
+      setConversation((prev) => [...prev, { ...messageData }]);
     }
   }
 
@@ -42,7 +43,16 @@ const Chat = () => {
         text: message,
       })
     );
+    setConversation((prev) => [...prev, { 
+      text:message,
+      sender: userInfo.id,
+      recipient: userId,
+     }]);
+    setMessage("");
   }
+
+  const UniqueMessages=uniqBy(conversation,'id');
+  // const UniqueMessages=conversation;
 
   return (
     <div className="flex h-screen">
@@ -67,41 +77,52 @@ const Chat = () => {
           </div>
         ))}
       </div>
-      <div className="bg-pink-300 w-2/3 p-2 flex flex-col-reverse">
+      <div className="bg-pink-300 w-2/3 p-2 flex flex-col justify-end">
         {!userId && (
           <div className="m-auto text-slate-400 text-2xl">
             &larr; Start a Conversation
           </div>
         )}
         {userId && (
-          <form className="flex gap-2" onSubmit={sendMessage}>
-            <input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              type="text"
-              placeholder="Type a Message"
-              className="p-2 flex-grow rounded-sm"
-            />
-            <button
-              type="submit"
-              className="bg-pink-500 text-white p-2 rounded-sm"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
+          <>
+            <div>
+              {UniqueMessages.map(e=>(
+                <div>
+                  {/* sender:{e.sender}<br/>
+                  reciever:{e.recipient}<br/> */}
+                  {e.text}
+                </div>
+              ))}
+            </div>
+            <form className="flex gap-2" onSubmit={sendMessage}>
+              <input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                type="text"
+                placeholder="Type a Message"
+                className="p-2 flex-grow rounded-sm"
+              />
+              <button
+                type="submit"
+                className="bg-pink-500 text-white p-2 rounded-sm"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                />
-              </svg>
-            </button>
-          </form>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+                  />
+                </svg>
+              </button>
+            </form>
+          </>
         )}
       </div>
     </div>
