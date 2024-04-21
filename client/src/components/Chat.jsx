@@ -1,16 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import Avatar from "./Avatar";
 import { UserContext } from "../UserContext";
 import Logo from "./Logo";
-import {uniqBy} from "lodash";
+import { uniqBy } from "lodash";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
   const [onlinePeople, setOnlinePeople] = useState([]);
-  const [userId, setUserId] = useState(null);
+  const [selectedUserId, setselectedUserId] = useState(null);
   const { userInfo } = useContext(UserContext);
   const [message, setMessage] = useState();
   const [conversation, setConversation] = useState([]);
+  const messagesEndRef = useRef(null);
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:4040");
     setWs(ws);
@@ -30,7 +31,7 @@ const Chat = () => {
     const messageData = JSON.parse(e.data);
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
-    }else if("text" in messageData){
+    } else if ("text" in messageData) {
       setConversation((prev) => [...prev, { ...messageData }]);
     }
   }
@@ -39,20 +40,30 @@ const Chat = () => {
     e.preventDefault();
     ws.send(
       JSON.stringify({
-        recipient: userId,
+        recipient: selectedUserId,
         text: message,
       })
     );
-    setConversation((prev) => [...prev, { 
-      text:message,
-      sender: userInfo.id,
-      recipient: userId,
-     }]);
+    setConversation((prev) => [
+      ...prev,
+      {
+        text: message,
+        sender: userInfo.id,
+        recipient: selectedUserId,
+        id: Date.now(),
+      },
+    ]);
     setMessage("");
   }
 
-  const UniqueMessages=uniqBy(conversation,'id');
-  // const UniqueMessages=conversation;
+  const UniqueMessages = uniqBy(conversation, "id");
+
+  useEffect(() => {
+    const div=messagesEndRef.current;
+    if (div) {
+      div.scrollIntoView({ behavior: "smooth" ,block:"end"});
+    }
+  }, [conversation]);
 
   return (
     <div className="flex h-screen">
@@ -61,13 +72,13 @@ const Chat = () => {
         {Object.keys(onlinePeople).map((id) => (
           <div
             key={id}
-            onClick={() => setUserId(id)}
+            onClick={() => setselectedUserId(id)}
             className={
               "border-b-2 border-pink-300 flex items-center gap-2 cursor-pointer " +
-              (userId === id ? "bg-pink-300" : "bg-pink-200")
+              (selectedUserId === id ? "bg-pink-300" : "bg-pink-200")
             }
           >
-            {userId === id && (
+            {selectedUserId === id && (
               <div className="bg-pink-600 w-1 h-12 rounded-r-md"></div>
             )}
             <div className="flex items-center gap-2 py-2 pl-4">
@@ -78,25 +89,34 @@ const Chat = () => {
         ))}
       </div>
       <div className="bg-pink-300 w-2/3 p-2 flex flex-col justify-end">
-        {!userId && (
+        {!selectedUserId && (
           <div className="m-auto text-slate-400 text-2xl">
             &larr; Start a Conversation
           </div>
         )}
-        {userId && (
+        {selectedUserId && (
           <>
-            <div>
-              {UniqueMessages.map(e=>(
-                <div>
-                  {/* sender:{e.sender}<br/>
-                  reciever:{e.recipient}<br/> */}
-                  {e.text}
+            <div className="overflow-y-scroll">
+              {UniqueMessages.map((msg) => (
+                <div className="w-full" style={{ clear: "both" }}>
+                  <div
+                    className={
+                      "w-fit p-1 px-3 m-2 rounded-lg " +
+                      (userInfo.id === msg.sender
+                        ? "bg-pink-200 float-right"
+                        : "bg-pink-600 float-left")
+                    }
+                  >
+                    {msg.text}
+                  </div>
                 </div>
               ))}
+              <div ref={messagesEndRef}></div>
             </div>
-            <form className="flex gap-2" onSubmit={sendMessage}>
+            <form className="flex gap-2 mt-3" onSubmit={sendMessage}>
               <input
                 value={message}
+                s
                 onChange={(e) => setMessage(e.target.value)}
                 type="text"
                 placeholder="Type a Message"
