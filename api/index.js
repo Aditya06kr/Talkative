@@ -102,6 +102,19 @@ app.get("/profile", (req, res) => {
   }
 });
 
+app.get("/messages/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const { ourUserId } = req.query;
+  // console.log(userId);
+  // console.log(ourUserId);
+
+  const messages = await Message.find({
+    sender: { $in: [userId, ourUserId] },
+    recipient: { $in: [userId, ourUserId] },
+  }).sort({ createdAt: -1 });
+  res.json(messages);
+});
+
 const server = app.listen(4040);
 
 const wss = new ws.WebSocketServer({ server });

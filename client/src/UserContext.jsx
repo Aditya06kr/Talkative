@@ -10,7 +10,7 @@ export function UserContextProvider({ children }) {
     axios.get("/profile").then(res=>{
       setUserInfo(res.data);
     })
-  },[userInfo]);
+  },[]);
   return (
     <UserContext.Provider value={{ userInfo, setUserInfo }}>
       {children}
