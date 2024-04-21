@@ -60,13 +60,11 @@ const Chat = () => {
         text: message,
         sender: userInfo.id,
         recipient: selectedUserId,
-        id: Date.now(),
+        _id: Date.now(),
       },
     ]);
     setMessage("");
   }
-
-  const UniqueMessages = uniqBy(conversation, "id");
 
   useEffect(() => {
     const div = messagesEndRef.current;
@@ -77,13 +75,19 @@ const Chat = () => {
 
   useEffect(() => {
     if (selectedUserId) {
-      axios.get("/messages/" + selectedUserId, {
-        params: {
-          ourUserId: userInfo.id,
-        },
-      });
+      axios
+        .get("/messages/" + selectedUserId, {
+          params: {
+            ourUserId: userInfo.id,
+          },
+        })
+        .then((res) => {
+          setConversation(res.data);
+        });
     }
   }, [selectedUserId]);
+
+  const UniqueMessages = uniqBy(conversation, "_id");
 
   return (
     <div className="flex h-screen">
@@ -118,8 +122,9 @@ const Chat = () => {
           <>
             <div className="overflow-y-scroll">
               {UniqueMessages.map((msg) => (
-                <div className="w-full" style={{ clear: "both" }}>
+                <div className="w-full" key={msg._id} style={{ clear: "both" }}>
                   <div
+                    key={msg._id}
                     className={
                       "w-fit p-1 px-3 m-2 rounded-lg " +
                       (userInfo.id === msg.sender
