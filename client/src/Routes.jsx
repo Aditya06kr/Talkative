@@ -7,6 +7,7 @@ const Routes = () => {
   const {userInfo} = useContext(UserContext);
   const username = userInfo?.username;
   if (username) {
+    console.log("Login Done");
     return <Chat />;
   } else {
     return <RegisterOrLogin />;

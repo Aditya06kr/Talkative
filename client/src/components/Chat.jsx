@@ -4,10 +4,12 @@ import { UserContext } from "../UserContext";
 import Logo from "./Logo";
 import { uniqBy } from "lodash";
 import axios from "axios";
+import Contacts from "./Contacts";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
-  const [onlinePeople, setOnlinePeople] = useState([]);
+  const [onlinePeople, setOnlinePeople] = useState({});
+  const [offlinePeople, setOfflinePeople] = useState({});
   const [selectedUserId, setselectedUserId] = useState(null);
   const { userInfo } = useContext(UserContext);
   const [message, setMessage] = useState();
@@ -87,6 +89,20 @@ const Chat = () => {
     }
   }, [selectedUserId]);
 
+  useEffect(() => {
+    axios.get("/people").then((res) => {
+      const offlineUsersArr = res.data
+        .filter((p) => p._id !== userInfo.id)
+        .filter((p) => !Object.keys(onlinePeople).includes(p._id));
+
+      const offlineUsers = {};
+      offlineUsersArr.forEach((user) => {
+        offlineUsers[user._id] = user.username;
+      });
+      setOfflinePeople(offlineUsers);
+    });
+  }, [onlinePeople]);
+
   const UniqueMessages = uniqBy(conversation, "_id");
 
   return (
@@ -94,22 +110,22 @@ const Chat = () => {
       <div className="bg-pink-200 w-1/3 py-4">
         <Logo />
         {Object.keys(onlinePeople).map((id) => (
-          <div
-            key={id}
-            onClick={() => setselectedUserId(id)}
-            className={
-              "border-b-2 border-pink-300 flex items-center gap-2 cursor-pointer " +
-              (selectedUserId === id ? "bg-pink-300" : "bg-pink-200")
-            }
-          >
-            {selectedUserId === id && (
-              <div className="bg-pink-600 w-1 h-12 rounded-r-md"></div>
-            )}
-            <div className="flex items-center gap-2 py-2 pl-4">
-              <Avatar username={onlinePeople[id]} id={id} online={true}/>
-              <span>{onlinePeople[id]}</span>
-            </div>
-          </div>
+          <Contacts
+            id={id}
+            selectedUserId={selectedUserId}
+            setselectedUserId={setselectedUserId}
+            userName={onlinePeople[id]}
+            online={true}
+          />
+        ))}
+        {Object.keys(offlinePeople).map((id) => (
+          <Contacts
+            id={id}
+            selectedUserId={selectedUserId}
+            setselectedUserId={setselectedUserId}
+            userName={offlinePeople[id]}
+            online={false}
+          />
         ))}
       </div>
       <div className="bg-pink-300 w-2/3 p-2 flex flex-col justify-end">
@@ -129,7 +145,7 @@ const Chat = () => {
                       "w-fit p-1 px-3 m-2 rounded-lg " +
                       (userInfo.id === msg.sender
                         ? "bg-pink-200 float-right"
-                        : "bg-pink-600 float-left")
+                        : "bg-pink-400 float-left")
                     }
                   >
                     {msg.text}
