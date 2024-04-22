@@ -6,7 +6,6 @@ import { UserContext } from "./UserContext";
 const Routes = () => {
   const {userInfo} = useContext(UserContext);
   const username = userInfo?.username;
-//   console.log(username);
   if (username) {
     return <Chat />;
   } else {

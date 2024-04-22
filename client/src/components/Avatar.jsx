@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-const Avatar = ({ username, id }) => {
-    const [color,setColor]=useState(0);
+const Avatar = ({ username, id, online }) => {
+  const [color, setColor] = useState(0);
   const colors = [
     "bg-teal-200",
     "bg-red-200",
@@ -18,15 +18,20 @@ const Avatar = ({ username, id }) => {
   ];
   useEffect(() => {
     const userIdBase10 = parseInt(id, 16);
-    const ind=userIdBase10%(colors.length);
+    const ind = userIdBase10 % colors.length;
     setColor(colors[ind]);
   }, []);
 
   return (
-    <div
-      className={`${color} w-8 h-8 rounded-full flex items-center justify-center`}
-    >
-      {username[0]}
+    <div className="relative">
+      <div
+        className={`${color} w-8 h-8 rounded-full flex items-center justify-center`}
+      >
+        {username[0]}
+      </div>
+      {online && (
+        <div className="w-3 h-3 bg-green-500 absolute bottom-0 right-0 rounded-full border border-white"></div>
+      )}
     </div>
   );
 };

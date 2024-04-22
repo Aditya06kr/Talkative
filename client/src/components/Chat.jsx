@@ -106,7 +106,7 @@ const Chat = () => {
               <div className="bg-pink-600 w-1 h-12 rounded-r-md"></div>
             )}
             <div className="flex items-center gap-2 py-2 pl-4">
-              <Avatar username={onlinePeople[id]} id={id} />
+              <Avatar username={onlinePeople[id]} id={id} online={true}/>
               <span>{onlinePeople[id]}</span>
             </div>
           </div>
