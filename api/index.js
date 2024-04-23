@@ -84,8 +84,7 @@ app.post("/login", async (req, res) => {
       } else {
         res.json("Wrong Credentials");
       }
-    }
-    else{
+    } else {
       res.json("First Register Yourself");
     }
   } catch (err) {
@@ -118,15 +117,40 @@ app.get("/messages/:userId", async (req, res) => {
   res.json(messages);
 });
 
-app.get("/people",async (req,res)=>{
-  const users = await User.find({},{'_id':1,username:1});
+app.get("/people", async (req, res) => {
+  const users = await User.find({}, { _id: 1, username: 1 });
   res.json(users);
-})
+});
 
 const server = app.listen(4040);
 
 const wss = new ws.WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
+  function notifyAboutOnlinePeople() {
+    [...wss.clients].forEach((client) => {
+      const onlineUsers = [...wss.clients].map((c) => ({
+        id: c.id,
+        username: c.username,
+      }));
+      client.send(JSON.stringify({ online: onlineUsers }));
+    });
+  }
+
+  connection.isAlive = true;
+
+  connection.timer = setInterval(() => {
+    connection.ping();
+    connection.deathTimer = setTimeout(() => {
+      connection.isAlive = false;
+      clearTimeout(connection.timer);
+      notifyAboutOnlinePeople();
+    }, 1000);
+  }, 5000);
+
+  connection.on("pong", () => {
+    clearTimeout(connection.deathTimer);
+  });
+
   const cookies = req.headers.cookie;
   if (cookies) {
     const cookieArray = cookies.split(";");
@@ -168,11 +192,5 @@ wss.on("connection", (connection, req) => {
     }
   });
 
-  [...wss.clients].forEach((client) => {
-    const onlineUsers = [...wss.clients].map((c) => ({
-      id: c.id,
-      username: c.username,
-    }));
-    client.send(JSON.stringify({ online: onlineUsers }));
-  });
+  notifyAboutOnlinePeople();
 });
