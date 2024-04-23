@@ -85,6 +85,9 @@ app.post("/login", async (req, res) => {
         res.json("Wrong Credentials");
       }
     }
+    else{
+      res.json("First Register Yourself");
+    }
   } catch (err) {
     throw err;
   }

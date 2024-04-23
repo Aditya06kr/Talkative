@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
-import Avatar from "./Avatar";
 import { UserContext } from "../UserContext";
 import Logo from "./Logo";
 import { uniqBy } from "lodash";

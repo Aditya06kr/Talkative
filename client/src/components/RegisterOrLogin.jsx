@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../UserContext";
 import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,7 +8,7 @@ const RegisterOrLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [type, setType] = useState(true);
-  const { setUserInfo } = useContext(UserContext);
+  const { userInfo,setUserInfo } = useContext(UserContext);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -23,6 +23,13 @@ const RegisterOrLogin = () => {
       toast.error(res.data);
     }
   }
+
+  useEffect(()=>{
+    axios.get("/profile").then(res=>{
+      setUserInfo(res.data);
+    })
+  },[userInfo]);
+
   return (
     <div className="bg-pink-100 h-screen flex items-center">
       <form className="w-80 mx-auto" onSubmit={handleSubmit}>
