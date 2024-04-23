@@ -1,14 +1,14 @@
 import axios from "axios";
 import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../UserContext";
-import {toast} from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const RegisterOrLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [type, setType] = useState(true);
-  const { userInfo,setUserInfo } = useContext(UserContext);
+  const { userInfo, setUserInfo } = useContext(UserContext);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -17,18 +17,18 @@ const RegisterOrLogin = () => {
       password,
     });
     if (res.status == 201) {
-      toast.success((type) ? "Registration successfull" : "Login Successfull");
+      toast.success(type ? "Registration successfull" : "Login Successfull");
       setUserInfo(res);
-    } else { 
+    } else {
       toast.error(res.data);
     }
   }
 
-  useEffect(()=>{
-    axios.get("/profile").then(res=>{
+  useEffect(() => {
+    axios.get("/profile").then((res) => {
       setUserInfo(res.data);
-    })
-  },[userInfo]);
+    });
+  }, [userInfo]);
 
   return (
     <div className="bg-pink-100 h-screen flex items-center">

@@ -4,13 +4,16 @@ import Logo from "./Logo";
 import { uniqBy } from "lodash";
 import axios from "axios";
 import Contacts from "./Contacts";
+import "../App.css";
+import {toast} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
   const [onlinePeople, setOnlinePeople] = useState({});
   const [offlinePeople, setOfflinePeople] = useState({});
   const [selectedUserId, setselectedUserId] = useState(null);
-  const { userInfo } = useContext(UserContext);
+  const { userInfo, setUserInfo } = useContext(UserContext);
   const [message, setMessage] = useState();
   const [conversation, setConversation] = useState([]);
   const messagesEndRef = useRef(null);
@@ -55,15 +58,17 @@ const Chat = () => {
         text: message,
       })
     );
-    setConversation((prev) => [
-      ...prev,
-      {
-        text: message,
-        sender: userInfo.id,
-        recipient: selectedUserId,
-        _id: Date.now(),
-      },
-    ]);
+    if (message) {
+      setConversation((prev) => [
+        ...prev,
+        {
+          text: message,
+          sender: userInfo.id,
+          recipient: selectedUserId,
+          _id: Date.now(),
+        },
+      ]);
+    }
     setMessage("");
   }
 
@@ -102,30 +107,48 @@ const Chat = () => {
     });
   }, [onlinePeople]);
 
+  function LogOut(){
+    axios.get("/logout")
+    .then(()=>{
+      setUserInfo(null);
+      toast.success("Logout Successfully");
+    })
+  }
+
   const UniqueMessages = uniqBy(conversation, "_id");
 
   return (
     <div className="flex h-screen">
-      <div className="bg-pink-200 w-1/3 py-4">
-        <Logo />
-        {Object.keys(onlinePeople).map((id) => (
-          <Contacts
-            id={id}
-            selectedUserId={selectedUserId}
-            setselectedUserId={setselectedUserId}
-            userName={onlinePeople[id]}
-            online={true}
-          />
-        ))}
-        {Object.keys(offlinePeople).map((id) => (
-          <Contacts
-            id={id}
-            selectedUserId={selectedUserId}
-            setselectedUserId={setselectedUserId}
-            userName={offlinePeople[id]}
-            online={false}
-          />
-        ))}
+      <div className="bg-pink-200 w-1/3 py-4 flex flex-col justify-between">
+        <div className="overflow-auto">
+          <Logo />
+          {Object.keys(onlinePeople).map((id) => (
+            <Contacts
+              id={id}
+              selectedUserId={selectedUserId}
+              setselectedUserId={setselectedUserId}
+              userName={onlinePeople[id]}
+              online={true}
+            />
+          ))}
+          {Object.keys(offlinePeople).map((id) => (
+            <Contacts
+              id={id}
+              selectedUserId={selectedUserId}
+              setselectedUserId={setselectedUserId}
+              userName={offlinePeople[id]}
+              online={false}
+            />
+          ))}
+        </div>
+        <div className="w-full flex justify-around">
+          <span className="text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-2 px-4 rounded">
+            {userInfo?.username}
+          </span>
+          <button onClick={LogOut} className="text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-2 px-4 rounded">
+            LogOut
+          </button>
+        </div>
       </div>
       <div className="bg-pink-300 w-2/3 p-2 flex flex-col justify-end">
         {!selectedUserId && (
@@ -135,7 +158,7 @@ const Chat = () => {
         )}
         {selectedUserId && (
           <>
-            <div className="overflow-y-scroll">
+            <div className="overflow-y-auto custom-scrollbar">
               {UniqueMessages.map((msg) => (
                 <div className="w-full" key={msg._id} style={{ clear: "both" }}>
                   <div
@@ -160,7 +183,7 @@ const Chat = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 type="text"
                 placeholder="Type a Message"
-                className="p-2 flex-grow rounded-sm"
+                className="p-2 flex-grow rounded-sm focus:outline-none bg-pink-100"
               />
               <button
                 type="submit"

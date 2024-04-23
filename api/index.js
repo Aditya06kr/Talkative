@@ -100,8 +100,14 @@ app.get("/profile", (req, res) => {
       res.json(info);
     });
   } else {
-    res.json("no token");
+    res.json(null);
   }
+});
+
+app.get("/logout", (req, res) => {
+  res
+    .clearCookie("token", { path: "/" })
+    .json({ message: "Logged out successfully", status: "ok" });
 });
 
 app.get("/messages/:userId", async (req, res) => {
@@ -170,7 +176,6 @@ wss.on("connection", (connection, req) => {
   connection.on("message", async (message) => {
     const messageString = JSON.parse(message.toString());
     const { recipient, text } = messageString;
-
     if (recipient && text) {
       const messageDoc = await Message.create({
         sender: connection.id,
