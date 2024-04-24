@@ -120,7 +120,7 @@ const Chat = () => {
   return (
     <div className="flex h-screen">
       <div className="bg-pink-200 w-1/3 py-4 flex flex-col justify-between">
-        <div className="overflow-auto">
+        <div className="overflow-auto mb-4">
           <Logo />
           {Object.keys(onlinePeople).map((id) => (
             <Contacts
