@@ -108,7 +108,7 @@ const Chat = () => {
   }, [onlinePeople]);
 
   function LogOut(){
-    axios.get("/logout")
+    axios.post("/logout")
     .then(()=>{
       setUserInfo(null);
       toast.success("Logout Successfully");

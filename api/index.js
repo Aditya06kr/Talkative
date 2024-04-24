@@ -104,17 +104,13 @@ app.get("/profile", (req, res) => {
   }
 });
 
-app.get("/logout", (req, res) => {
-  res
-    .clearCookie("token", { path: "/" })
-    .json({ message: "Logged out successfully", status: "ok" });
+app.post("/logout", (req, res) => {
+  res.cookie("token", "").json("ok");
 });
 
 app.get("/messages/:userId", async (req, res) => {
   const { userId } = req.params;
   const { ourUserId } = req.query;
-  // console.log(userId);
-  // console.log(ourUserId);
 
   const messages = await Message.find({
     sender: { $in: [userId, ourUserId] },
@@ -148,7 +144,8 @@ wss.on("connection", (connection, req) => {
     connection.ping();
     connection.deathTimer = setTimeout(() => {
       connection.isAlive = false;
-      clearTimeout(connection.timer);
+      clearInterval(connection.timer);
+      connection.terminate();
       notifyAboutOnlinePeople();
     }, 1000);
   }, 5000);
