@@ -58,17 +58,6 @@ const Chat = () => {
         text: message,
       })
     );
-    if (message) {
-      setConversation((prev) => [
-        ...prev,
-        {
-          text: message,
-          sender: userInfo.id,
-          recipient: selectedUserId,
-          _id: Date.now(),
-        },
-      ]);
-    }
     setMessage("");
   }
 
@@ -111,6 +100,7 @@ const Chat = () => {
     axios.post("/logout")
     .then(()=>{
       setUserInfo(null);
+      setWs(null);
       toast.success("Logout Successfully");
     })
   }
