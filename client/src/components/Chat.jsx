@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useContext, useEffect, useState, useRef, useLayoutEffect } from "react";
 import { UserContext } from "../UserContext";
 import Logo from "./Logo";
 import { uniqBy } from "lodash";
@@ -62,13 +62,6 @@ const Chat = () => {
   }
 
   useEffect(() => {
-    const div = messagesEndRef.current;
-    if (div) {
-      div.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  }, [conversation]);
-
-  useEffect(() => {
     if (selectedUserId) {
       axios
         .get("/messages/" + selectedUserId, {
@@ -106,6 +99,13 @@ const Chat = () => {
   }
 
   const UniqueMessages = uniqBy(conversation, "_id");
+
+  useEffect(() => {
+    const div = messagesEndRef.current;
+    if (div) {
+      div.scrollIntoView({ behavior: "smooth"});
+    }
+  }, [UniqueMessages]);
 
   return (
     <div className="flex h-screen">
