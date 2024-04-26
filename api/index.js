@@ -120,8 +120,29 @@ app.get("/messages/:userId", async (req, res) => {
 });
 
 app.get("/people", async (req, res) => {
+  const { ourUserId } = req.query;
   const users = await User.find({}, { _id: 1, username: 1 });
-  res.json(users);
+
+  const usersArray = await Promise.all(
+    users.map(async (user) => {
+      const additionalData = await Message.findOne(
+        {
+          sender: { $in: [user._id, ourUserId] },
+          recipient: { $in: [user._id, ourUserId] },
+        },
+        { updatedAt: 1,_id:0 }
+      ).sort({ updatedAt: -1 });
+
+      return {
+        ...user.toObject(),
+        updatedAt: (additionalData?.updatedAt ? additionalData?.updatedAt : null),
+        isOnline:false,
+      };
+    })
+  );
+
+  // console.log(usersArray);
+  res.json(usersArray);
 });
 
 const server = app.listen(process.env.API_PORT);
@@ -180,7 +201,7 @@ wss.on("connection", (connection, req) => {
         text,
       });
       [...wss.clients]
-        .filter((user) => ((user.id === recipient)||(user.id===connection.id)))
+        .filter((user) => user.id === recipient || user.id === connection.id)
         .forEach((c) =>
           c.send(
             JSON.stringify({

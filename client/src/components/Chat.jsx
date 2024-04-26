@@ -11,8 +11,8 @@ import "react-toastify/dist/ReactToastify.css";
 const Chat = () => {
   const [ws, setWs] = useState(null);
   const [onlinePeople, setOnlinePeople] = useState({});
-  const [offlinePeople, setOfflinePeople] = useState({});
-  const [selectedUserId, setselectedUserId] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [message, setMessage] = useState();
   const [conversation, setConversation] = useState([]);
@@ -75,20 +75,6 @@ const Chat = () => {
     }
   }, [selectedUserId]);
 
-  useEffect(() => {
-    axios.get("/people").then((res) => {
-      const offlineUsersArr = res.data
-        .filter((p) => p._id !== userInfo.id)
-        .filter((p) => !Object.keys(onlinePeople).includes(p._id));
-
-      const offlineUsers = {};
-      offlineUsersArr.forEach((user) => {
-        offlineUsers[user._id] = user.username;
-      });
-      setOfflinePeople(offlineUsers);
-    });
-  }, [onlinePeople]);
-
   function LogOut() {
     axios.post("/logout").then(() => {
       setUserInfo(null);
@@ -104,29 +90,39 @@ const Chat = () => {
     if (div) {
       div.scrollIntoView({ behavior: "smooth" });
     }
-  }, [UniqueMessages]);
+  }, [conversation,setSelectedUserId]);
+
+  useEffect(() => {
+    axios.get("/people",{
+      params: {
+        ourUserId: userInfo.id,
+      },
+    }).then((res) => {
+      const users=res.data;
+      users.forEach(user=>{
+        if(onlinePeople.hasOwnProperty(user._id)){
+          user.isOnline=true;
+        }
+      })
+
+      const userArray=users.filter(user => user._id !== userInfo.id);
+      userArray.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      setAllUsers(userArray);
+    });
+  }, [onlinePeople,UniqueMessages]);
 
   return (
     <div className="flex h-screen">
       <div className="bg-pink-200 w-1/3 py-4 flex flex-col justify-between">
         <div className="overflow-auto mb-4">
           <Logo />
-          {Object.keys(onlinePeople).map((id) => (
+          {allUsers.map((user) => (
             <Contacts
-              id={id}
+              id={user._id}
               selectedUserId={selectedUserId}
-              setselectedUserId={setselectedUserId}
-              userName={onlinePeople[id]}
-              online={true}
-            />
-          ))}
-          {Object.keys(offlinePeople).map((id) => (
-            <Contacts
-              id={id}
-              selectedUserId={selectedUserId}
-              setselectedUserId={setselectedUserId}
-              userName={offlinePeople[id]}
-              online={false}
+              setSelectedUserId={setSelectedUserId}
+              userName={user.username}
+              online={user.isOnline}
             />
           ))}
         </div>

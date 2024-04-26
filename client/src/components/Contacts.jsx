@@ -1,11 +1,11 @@
 import React from "react";
 import Avatar from "./Avatar";
 
-const Contacts = ({id,selectedUserId,setselectedUserId,userName,online}) => {
+const Contacts = ({id,selectedUserId,setSelectedUserId,userName,online}) => {
   return (
     <div
       key={id}
-      onClick={() => setselectedUserId(id)}
+      onClick={() => setSelectedUserId(id)}
       className={
         "border-b-2 border-pink-300 flex items-center gap-2 cursor-pointer " +
         (selectedUserId === id ? "bg-pink-300" : "bg-pink-200")
