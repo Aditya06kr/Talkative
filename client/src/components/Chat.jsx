@@ -1,12 +1,12 @@
-import React, { useContext, useEffect, useState, useRef, useLayoutEffect } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { UserContext } from "../UserContext";
 import Logo from "./Logo";
 import { uniqBy } from "lodash";
 import axios from "axios";
 import Contacts from "./Contacts";
 import "../App.css";
-import {toast} from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
@@ -89,13 +89,12 @@ const Chat = () => {
     });
   }, [onlinePeople]);
 
-  function LogOut(){
-    axios.post("/logout")
-    .then(()=>{
+  function LogOut() {
+    axios.post("/logout").then(() => {
       setUserInfo(null);
       setWs(null);
       toast.success("Logout Successfully");
-    })
+    });
   }
 
   const UniqueMessages = uniqBy(conversation, "_id");
@@ -103,7 +102,7 @@ const Chat = () => {
   useEffect(() => {
     const div = messagesEndRef.current;
     if (div) {
-      div.scrollIntoView({ behavior: "smooth"});
+      div.scrollIntoView({ behavior: "smooth" });
     }
   }, [UniqueMessages]);
 
@@ -132,10 +131,27 @@ const Chat = () => {
           ))}
         </div>
         <div className="w-full flex justify-around">
-          <span className="text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-2 px-4 rounded">
-            {userInfo?.username}
-          </span>
-          <button onClick={LogOut} className="text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-2 px-4 rounded">
+          <div className="flex gap-1 text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-2 px-4 rounded-xl">
+            <span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </span>
+            <span>{userInfo?.username}</span>
+          </div>
+          <button
+            onClick={LogOut}
+            className="text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-2 px-4 rounded-xl"
+          >
             LogOut
           </button>
         </div>

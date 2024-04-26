@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_KEY,
   })
 );
 
@@ -124,7 +124,7 @@ app.get("/people", async (req, res) => {
   res.json(users);
 });
 
-const server = app.listen(4040);
+const server = app.listen(process.env.API_PORT);
 
 const wss = new ws.WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
