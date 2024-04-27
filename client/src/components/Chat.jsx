@@ -7,6 +7,7 @@ import Contacts from "./Contacts";
 import "../App.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import InputEmoji from 'react-input-emoji';
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
@@ -51,7 +52,9 @@ const Chat = () => {
   }
 
   function sendMessage(e) {
-    e.preventDefault();
+    if(e.type=='submit'){
+      e.preventDefault();
+    }
     ws.send(
       JSON.stringify({
         recipient: selectedUserId,
@@ -90,26 +93,28 @@ const Chat = () => {
     if (div) {
       div.scrollIntoView({ behavior: "smooth" });
     }
-  }, [conversation,setSelectedUserId]);
+  }, [conversation, setSelectedUserId]);
 
   useEffect(() => {
-    axios.get("/people",{
-      params: {
-        ourUserId: userInfo.id,
-      },
-    }).then((res) => {
-      const users=res.data;
-      users.forEach(user=>{
-        if(onlinePeople.hasOwnProperty(user._id)){
-          user.isOnline=true;
-        }
+    axios
+      .get("/people", {
+        params: {
+          ourUserId: userInfo.id,
+        },
       })
+      .then((res) => {
+        const users = res.data;
+        users.forEach((user) => {
+          if (onlinePeople.hasOwnProperty(user._id)) {
+            user.isOnline = true;
+          }
+        });
 
-      const userArray=users.filter(user => user._id !== userInfo.id);
-      userArray.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-      setAllUsers(userArray);
-    });
-  }, [onlinePeople,UniqueMessages]);
+        const userArray = users.filter((user) => user._id !== userInfo.id);
+        userArray.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        setAllUsers(userArray);
+      });
+  }, [onlinePeople, UniqueMessages]);
 
   return (
     <div className="flex h-screen">
@@ -166,7 +171,7 @@ const Chat = () => {
                   <div
                     key={msg._id}
                     className={
-                      "w-fit p-1 px-3 m-2 rounded-lg " +
+                      "w-fit max-w-2xl p-1 px-3 m-2 rounded-2xl " +
                       (userInfo.id === msg.sender
                         ? "bg-pink-200 float-right"
                         : "bg-pink-400 float-left")
@@ -178,18 +183,19 @@ const Chat = () => {
               ))}
               <div ref={messagesEndRef}></div>
             </div>
-            <form className="flex gap-2 mt-3" onSubmit={sendMessage}>
-              <input
+            <form className="flex gap-2 items-center mt-3" onSubmit={sendMessage}>
+              <InputEmoji
                 value={message}
-                s
-                onChange={(e) => setMessage(e.target.value)}
-                type="text"
+                onChange={setMessage}
+                cleanOnEnter
+                onEnter={sendMessage}
                 placeholder="Type a Message"
-                className="p-2 flex-grow rounded-sm focus:outline-none bg-pink-100"
+                background="rgb(252 231 243)"
+                color="rgb(236 72 153)"
               />
               <button
                 type="submit"
-                className="bg-pink-500 text-white p-2 rounded-sm"
+                className="bg-pink-500 text-white p-2 rounded-sm h-3/4"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

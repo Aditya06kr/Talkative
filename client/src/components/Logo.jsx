@@ -2,7 +2,7 @@ import React from "react";
 
 const Logo = () => {
   return (
-    <div className="font-extrabold text-2xl text-pink-600 flex gap-2 pb-4 px-4 items-center border-b-2 border-pink-300">
+    <div className="font-extrabold text-2xl text-pink-600 flex gap-2 pb-4 px-4 items-center border-b-2 border-pink-300 cursor-pointer">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
