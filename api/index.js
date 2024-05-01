@@ -1,15 +1,15 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const User = require("./models/User");
-const Message = require("./models/Message");
-const cors = require("cors");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const cookieParser = require("cookie-parser");
-const ws = require("ws");
+import dotenv from "dotenv";
+import express from "express";
+import User from "./models/User.js";
+import Message from "./models/Message.js";
+import cors from "cors";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import cookieParser from "cookie-parser";
+import { WebSocketServer } from "ws";
+import connectDb from "./db/index.js";
+dotenv.config();
 
-const mongoUrl = process.env.MONGO_URL;
 const secret = "asjdfn238rn43gi4b40gn3";
 
 const app = express();
@@ -22,14 +22,7 @@ app.use(
   })
 );
 
-mongoose
-  .connect(mongoUrl)
-  .then(() => {
-    console.log("DB Connected");
-  })
-  .catch((e) => {
-    console.log("Error in Connecting DB " + e);
-  });
+connectDb();
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
@@ -141,13 +134,12 @@ app.get("/people", async (req, res) => {
     })
   );
 
-  // console.log(usersArray);
   res.json(usersArray);
 });
 
 const server = app.listen(process.env.API_PORT);
 
-const wss = new ws.WebSocketServer({ server });
+const wss = new WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
   function notifyAboutOnlinePeople() {
     [...wss.clients].forEach((client) => {
