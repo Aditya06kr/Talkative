@@ -17,7 +17,7 @@ const RegisterOrLogin = () => {
       password,
     });
     if (res.status == 201) {
-      toast.success(type ? "Registration successfull" : "Login Successfull");
+      toast.success(type ? "Registration Successfull" : "Login Successfull");
       setUserInfo(res);
     } else {
       toast.error(res.data);
