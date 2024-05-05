@@ -67,7 +67,7 @@ const Chat = () => {
   useEffect(() => {
     if (selectedUserId) {
       axios
-        .get("/messages/" + selectedUserId, {
+        .get("/chat/messages/" + selectedUserId, {
           params: {
             ourUserId: userInfo.id,
           },
@@ -79,7 +79,7 @@ const Chat = () => {
   }, [selectedUserId]);
 
   function LogOut() {
-    axios.post("/logout").then(() => {
+    axios.post("/user/logout").then(() => {
       setUserInfo(null);
       setWs(null);
       toast.success("Logout Successfully");
@@ -97,7 +97,7 @@ const Chat = () => {
 
   useEffect(() => {
     axios
-      .get("/people", {
+      .get("/chat/people", {
         params: {
           ourUserId: userInfo.id,
         },
@@ -197,6 +197,7 @@ const Chat = () => {
                 placeholder="Type a Message"
                 background="rgb(252 231 243)"
                 color="rgb(236 72 153)"
+                fontSize="16px"
               />
               <button
                 type="submit"

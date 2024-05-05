@@ -12,7 +12,7 @@ const RegisterOrLogin = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const res = await axios.post(type ? "/register" : "/login", {
+    const res = await axios.post("/user" + (type ? "/register" : "/login"), {
       username,
       password,
     });
@@ -25,7 +25,7 @@ const RegisterOrLogin = () => {
   }
 
   useEffect(() => {
-    axios.get("/profile").then((res) => {
+    axios.get("/user/profile").then((res) => {
       setUserInfo(res.data);
     });
   }, [userInfo]);

@@ -1,16 +1,14 @@
 import dotenv from "dotenv";
 import express from "express";
-import User from "./models/User.js";
 import Message from "./models/Message.js";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import { WebSocketServer } from "ws";
 import connectDb from "./db/index.js";
 dotenv.config();
 
-const secret = "asjdfn238rn43gi4b40gn3";
+const secret = process.env.SECRET;
 
 const app = express();
 app.use(express.json());
@@ -24,121 +22,16 @@ app.use(
 
 connectDb();
 
-app.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-  if (username.length < 6) {
-    res.json("Minimum length should be 6");
-  } else if (password.length == 0) {
-    res.json("Password should not be empty");
-  } else {
-    const existedUser = await User.findOne({ username });
-    if (existedUser) {
-      res.json("Username Already Existed");
-    } else {
-      try {
-        const createdUser = await User.create({
-          username,
-          password,
-        });
-        jwt.sign(
-          { username, id: createdUser._id },
-          secret,
-          {},
-          (err, token) => {
-            if (err) throw err;
-            res.cookie("token", token).status(201).json({
-              username,
-              id: createdUser._id,
-            });
-          }
-        );
-      } catch (err) {
-        console.error("Error in registration:", err);
-        res.status(500).json({ error: "Internal server error" });
-      }
-    }
-  }
-});
+// User components
+import userRouter from "./routers/Authentication.js";
+app.use("/api/v1/user",userRouter);
 
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const foundUser = await User.findOne({ username });
-    if (foundUser) {
-      const passOk = bcrypt.compareSync(password, foundUser.password);
-      if (passOk) {
-        jwt.sign({ username, id: foundUser._id }, secret, {}, (err, token) => {
-          if (err) throw err;
-          res.cookie("token", token).status(201).json({
-            username,
-            id: foundUser._id,
-          });
-        });
-      } else {
-        res.json("Wrong Credentials");
-      }
-    } else {
-      res.json("First Register Yourself");
-    }
-  } catch (err) {
-    throw err;
-  }
-});
+// Chat components
+import chatRouter from "./routers/Chat.js";
+app.use("/api/v1/chat",chatRouter);
 
-app.get("/profile", (req, res) => {
-  const token = req.cookies?.token;
-  if (token) {
-    jwt.verify(token, secret, {}, (err, info) => {
-      if (err) throw err;
-      res.json(info);
-    });
-  } else {
-    res.json(null);
-  }
-});
-
-app.post("/logout", (req, res) => {
-  res.cookie("token", "").json("ok");
-});
-
-app.get("/messages/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const { ourUserId } = req.query;
-
-  const messages = await Message.find({
-    sender: { $in: [userId, ourUserId] },
-    recipient: { $in: [userId, ourUserId] },
-  }).sort({ createdAt: 1 });
-  res.json(messages);
-});
-
-app.get("/people", async (req, res) => {
-  const { ourUserId } = req.query;
-  const users = await User.find({}, { _id: 1, username: 1 });
-
-  const usersArray = await Promise.all(
-    users.map(async (user) => {
-      const additionalData = await Message.findOne(
-        {
-          sender: { $in: [user._id, ourUserId] },
-          recipient: { $in: [user._id, ourUserId] },
-        },
-        { updatedAt: 1,_id:0 }
-      ).sort({ updatedAt: -1 });
-
-      return {
-        ...user.toObject(),
-        updatedAt: (additionalData?.updatedAt ? additionalData?.updatedAt : null),
-        isOnline:false,
-      };
-    })
-  );
-
-  res.json(usersArray);
-});
-
+// Web Socket Logic
 const server = app.listen(process.env.API_PORT);
-
 const wss = new WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
   function notifyAboutOnlinePeople() {
