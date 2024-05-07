@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { WebSocketServer } from "ws";
 import connectDb from "./db/index.js";
+import { upload } from "./middlewares/multer.js";
+import { uploadOnCloudinary } from "./utils/cloudinary.js";
 dotenv.config();
 
 const secret = process.env.SECRET;
@@ -24,11 +26,21 @@ connectDb();
 
 // User components
 import userRouter from "./routers/Authentication.js";
-app.use("/api/v1/user",userRouter);
+app.use("/api/v1/user", userRouter);
 
 // Chat components
 import chatRouter from "./routers/Chat.js";
-app.use("/api/v1/chat",chatRouter);
+app.use("/api/v1/chat", chatRouter);
+
+app.post("/api/v1/uploads", upload.single("file"), async (req, res) => {
+  const filePath = req.file?.path;
+  if (filePath) {
+    const fileUploaded = await uploadOnCloudinary(filePath);
+    res.json({url:fileUploaded.url,name:fileUploaded.original_filename});
+  } else {
+    console.log("File haven't uploaded locally\n");
+  }
+});
 
 // Web Socket Logic
 const server = app.listen(process.env.API_PORT);
@@ -78,12 +90,14 @@ wss.on("connection", (connection, req) => {
 
   connection.on("message", async (message) => {
     const messageString = JSON.parse(message.toString());
-    const { recipient, text } = messageString;
-    if (recipient && text) {
+    const { recipient, text, url, name } = messageString;
+    if (recipient && (text || url)) {
       const messageDoc = await Message.create({
         sender: connection.id,
         recipient,
         text,
+        url,
+        name,
       });
       [...wss.clients]
         .filter((user) => user.id === recipient || user.id === connection.id)
@@ -91,6 +105,8 @@ wss.on("connection", (connection, req) => {
           c.send(
             JSON.stringify({
               text,
+              url,
+              name,
               sender: connection.id,
               recipient,
               _id: messageDoc._id,
