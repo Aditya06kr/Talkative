@@ -46,22 +46,40 @@ const Chat = () => {
     const messageData = JSON.parse(e.data);
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
-    } else if ("text" in messageData) {
+    } else if ("_id" in messageData) {
       setConversation((prev) => [...prev, { ...messageData }]);
     }
   }
 
-  function sendMessage(e) {
-    if (e.type == "submit") {
+  function sendMessage(e, file = "") {
+    if (e != null && e.type == "submit") {
       e.preventDefault();
     }
     ws.send(
       JSON.stringify({
         recipient: selectedUserId,
         text: message,
+        url: file.url,
+        name: file.name,
       })
     );
     setMessage("");
+  }
+
+  function sendFile(e) {
+    e.preventDefault();
+
+    const data = new FormData();
+    data.append("file", e.target.files[0]);
+
+    axios
+      .post("/uploads", data)
+      .then((res) => {
+        sendMessage(null, res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   useEffect(() => {
@@ -118,28 +136,26 @@ const Chat = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="bg-pink-200 w-1/3 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between flex-wrap border-b-2 border-pink-300 pb-1">
-            <Logo setSelectedUserId={setSelectedUserId} />
-            <button
-              onClick={LogOut}
-              className="text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-1 px-4 rounded-3xl mr-2"
-            >
-              LogOut
-            </button>
-          </div>
-          <div className="overflow-auto">
-            {allUsers.map((user) => (
-              <Contacts
-                id={user._id}
-                selectedUserId={selectedUserId}
-                setSelectedUserId={setSelectedUserId}
-                userName={user.username}
-                online={user.isOnline}
-              />
-            ))}
-          </div>
+      <div className="h-screen bg-pink-200 w-1/3 flex flex-col justify-between">
+        <div className="flex items-center justify-between flex-wrap border-b-2 border-pink-300 pb-1">
+          <Logo setSelectedUserId={setSelectedUserId} />
+          <button
+            onClick={LogOut}
+            className="text-gray-300 cursor-pointer bg-pink-400 hover:bg-pink-500 font-bold py-1 px-4 rounded-3xl mr-2"
+          >
+            LogOut
+          </button>
+        </div>
+        <div className="overflow-y-auto h-[425px] custom-scrollbar flex-1">
+          {allUsers.map((user) => (
+            <Contacts
+              id={user._id}
+              selectedUserId={selectedUserId}
+              setSelectedUserId={setSelectedUserId}
+              userName={user.username}
+              online={user.isOnline}
+            />
+          ))}
         </div>
         <div className="flex gap-1 justify-center items-center text-pink-600 border-pink-300 border-t-2 border-b-2 shadow-4xl hover:shadow-3xl text-xl font-bold py-2 px-4 ">
           <span>
@@ -179,7 +195,31 @@ const Chat = () => {
                         : "bg-pink-400 float-left")
                     }
                   >
-                    {msg.text}
+                    {msg.text ? (
+                      <div>{msg.text}</div>
+                    ) : (
+                      <div className="">
+                        <a
+                          target="_blank"
+                          className="flex items-center gap-1 border-b"
+                          href={msg.url}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-4 h-4"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M18.97 3.659a2.25 2.25 0 00-3.182 0l-10.94 10.94a3.75 3.75 0 105.304 5.303l7.693-7.693a.75.75 0 011.06 1.06l-7.693 7.693a5.25 5.25 0 11-7.424-7.424l10.939-10.94a3.75 3.75 0 115.303 5.304L9.097 18.835l-.008.008-.007.007-.002.002-.003.002A2.25 2.25 0 015.91 15.66l7.81-7.81a.75.75 0 011.061 1.06l-7.81 7.81a.75.75 0 001.054 1.068L18.97 6.84a2.25 2.25 0 000-3.182z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          {msg.name}
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -199,6 +239,21 @@ const Chat = () => {
                 color="rgb(236 72 153)"
                 fontSize="16px"
               />
+              <label className=" text-greyColor cursor-pointer rounded-sm">
+                <input type="file" className="hidden" onChange={sendFile} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-7 h-7"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18.97 3.659a2.25 2.25 0 00-3.182 0l-10.94 10.94a3.75 3.75 0 105.304 5.303l7.693-7.693a.75.75 0 011.06 1.06l-7.693 7.693a5.25 5.25 0 11-7.424-7.424l10.939-10.94a3.75 3.75 0 115.303 5.304L9.097 18.835l-.008.008-.007.007-.002.002-.003.002A2.25 2.25 0 015.91 15.66l7.81-7.81a.75.75 0 011.061 1.06l-7.81 7.81a.75.75 0 001.054 1.068L18.97 6.84a2.25 2.25 0 000-3.182z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </label>
               <button
                 type="submit"
                 className="bg-pink-500 text-white p-2 rounded-sm h-3/4"
