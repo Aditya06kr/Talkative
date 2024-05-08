@@ -73,7 +73,7 @@ const Chat = () => {
     data.append("file", e.target.files[0]);
 
     axios
-      .post("/uploads", data)
+      .post("/chat/uploads", data)
       .then((res) => {
         sendMessage(null, res.data);
       })

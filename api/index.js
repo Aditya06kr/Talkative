@@ -6,8 +6,6 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { WebSocketServer } from "ws";
 import connectDb from "./db/index.js";
-import { upload } from "./middlewares/multer.js";
-import { uploadOnCloudinary } from "./utils/cloudinary.js";
 dotenv.config();
 
 const secret = process.env.SECRET;
@@ -31,16 +29,6 @@ app.use("/api/v1/user", userRouter);
 // Chat components
 import chatRouter from "./routers/Chat.js";
 app.use("/api/v1/chat", chatRouter);
-
-app.post("/api/v1/uploads", upload.single("file"), async (req, res) => {
-  const filePath = req.file?.path;
-  if (filePath) {
-    const fileUploaded = await uploadOnCloudinary(filePath);
-    res.json({url:fileUploaded.url,name:fileUploaded.original_filename});
-  } else {
-    console.log("File haven't uploaded locally\n");
-  }
-});
 
 // Web Socket Logic
 const server = app.listen(process.env.API_PORT);
