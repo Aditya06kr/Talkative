@@ -2,7 +2,7 @@ import React from "react";
 
 const Logo = ({setSelectedUserId}) => {
   return (
-    <div onClick={()=>setSelectedUserId(null)} className="font-extrabold text-2xl text-pink-600 flex flex-wrap gap-2 py-4 px-4 items-center cursor-pointer">
+    <div onClick={()=>setSelectedUserId(null)} className="font-extrabold text-2xl text-blue-400 flex flex-wrap gap-2 py-4 px-4 items-center cursor-pointer">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

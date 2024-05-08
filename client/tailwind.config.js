@@ -10,7 +10,15 @@ export default {
           "rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px",
       },
       colors: {
-        "greyColor":"#858585"
+        "grey":"#858585",
+        "blue0":"#353647",
+        "blue1":"#303141",
+        "blue2":"#5a65ca",
+        "blue3":"#343546",
+        "blue4":"#414256",
+        "blue5":"#343543",
+        "color1":"#b92b27",
+        "color2":"#1565C0",
       }
     },
   },
