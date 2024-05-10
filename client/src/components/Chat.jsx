@@ -13,6 +13,7 @@ import { FcDocument, FcImageFile } from "react-icons/fc";
 import { AiOutlineSend } from "react-icons/ai";
 import { GrAttachment } from "react-icons/gr";
 import { IoLogOutOutline } from "react-icons/io5";
+import Popup from "reactjs-popup";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
@@ -22,6 +23,9 @@ const Chat = () => {
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [message, setMessage] = useState();
   const [conversation, setConversation] = useState([]);
+  const [isEditingMessage, setIsEditingMessage] = useState(false);
+  const [isEditingFile, setIsEditingFile] = useState(false);
+  const [editId, setEditId] = useState(null);
   const messagesEndRef = useRef(null);
   useEffect(() => {
     connectToWs();
@@ -60,14 +64,19 @@ const Chat = () => {
     if (e != null && e.type == "submit") {
       e.preventDefault();
     }
-    ws.send(
-      JSON.stringify({
-        recipient: selectedUserId,
-        text: message,
-        url: file.url,
-        name: file.name,
-      })
-    );
+
+    if (isEditingMessage) {
+      handleEditMessage();
+    } else {
+      ws.send(
+        JSON.stringify({
+          recipient: selectedUserId,
+          text: message,
+          url: file.url,
+          name: file.name,
+        })
+      );
+    }
     setMessage("");
   }
 
@@ -80,24 +89,30 @@ const Chat = () => {
     axios
       .post("/chat/uploads", data)
       .then((res) => {
-        sendMessage(null, res.data);
+        if (!isEditingFile) sendMessage(null, res.data);
+        else {
+          handleEditFile(res.data);
+        }
       })
       .catch((err) => {
         console.log(err);
       });
   }
 
+  function GenerateMessages() {
+    axios
+      .get("/chat/messages/" + selectedUserId, {
+        params: {
+          ourUserId: userInfo.id,
+        },
+      })
+      .then((res) => {
+        setConversation(res.data);
+      });
+  }
   useEffect(() => {
     if (selectedUserId) {
-      axios
-        .get("/chat/messages/" + selectedUserId, {
-          params: {
-            ourUserId: userInfo.id,
-          },
-        })
-        .then((res) => {
-          setConversation(res.data);
-        });
+      GenerateMessages();
     }
   }, [selectedUserId]);
 
@@ -107,6 +122,74 @@ const Chat = () => {
       setWs(null);
       toast.success("Logout Successfully");
     });
+  }
+
+  function handleEditMessage() {
+    axios
+      .put("/chat/editMessage/" + editId, { message })
+      .then((res) => {
+        if (res.status === 200) {
+          GenerateMessages();
+        } else {
+          console.log("Editing Message Failed");
+        }
+      })
+      .catch((err) => {
+        console.log("Editing message failed");
+        console.error("Error editing message:", err);
+      });
+    setEditId(null);
+    setIsEditingMessage(false);
+  }
+
+  function editMessage(msg, id) {
+    setMessage(msg);
+    setEditId(id);
+    setIsEditingMessage(true);
+  }
+
+  function handleEditFile(file) {
+    const url = file.url;
+    const name = file.name;
+
+    axios
+      .put("/chat/editFile/" + editId, { url, name })
+      .then((res) => {
+        if (res.status === 200) {
+          GenerateMessages();
+        } else {
+          console.log("Editing File Failed");
+        }
+      })
+      .catch((err) => {
+        console.log("Editing file failed");
+        console.error("Error editing file:", err);
+      });
+
+    setIsEditingFile(false);
+    setEditId(null);
+  }
+
+  function editFile(id) {
+    setEditId(id);
+    setIsEditingFile(true);
+    document.getElementById("selectFile").click();
+  }
+
+  function deleteMessage(deleteId) {
+    axios
+      .delete("/chat/deleteMessage/" + deleteId)
+      .then((res) => {
+        if (res.status === 200) {
+          GenerateMessages();
+        } else {
+          console.log("Error in Deleting Message");
+        }
+      })
+      .catch((err) => {
+        console.log("Error in Client Side in Deleting a Message");
+        console.log("Error Deleting message:", err);
+      });
   }
 
   const UniqueMessages = uniqBy(conversation, "_id");
@@ -134,10 +217,10 @@ const Chat = () => {
         });
 
         const userArray = users.filter((user) => user._id !== userInfo.id);
-        userArray.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        userArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setAllUsers(userArray);
       });
-  }, [onlinePeople, UniqueMessages]);
+  }, [conversation, onlinePeople]);
 
   return (
     <div className="flex h-screen bg-blue0">
@@ -146,7 +229,7 @@ const Chat = () => {
           <Logo setSelectedUserId={setSelectedUserId} />
           <button
             onClick={LogOut}
-            className="bg-blue2 hover:bg-blue-600 focus:bg-blue-400 focus:outline-none active:bg-blue-700 text-white border border-transparent rounded-md shadow-sm py-2 px-4 inline-block font-medium text-sm mr-3"
+            className="bg-blue2 hover:bg-blue-600 delay-150 focus:bg-blue-400 focus:outline-none active:bg-blue-700 text-white border border-transparent rounded-md shadow-sm py-2 px-3 inline-block font-medium text-sm mr-3"
           >
             <IoLogOutOutline size={25} />
           </button>
@@ -154,6 +237,7 @@ const Chat = () => {
         <div className="overflow-y-auto h-[425px] custom-scrollbar flex-1 m-2 rounded-xl ">
           {allUsers.map((user) => (
             <Contacts
+              key={user._id}
               id={user._id}
               selectedUserId={selectedUserId}
               setSelectedUserId={setSelectedUserId}
@@ -225,7 +309,75 @@ const Chat = () => {
                         }
                       >
                         {msg.text ? (
-                          <div>{msg.text}</div>
+                          userInfo.id === msg.sender ? (
+                            <Popup
+                              trigger={<div>{msg.text}</div>}
+                              position="left center"
+                              on="right-click"
+                              offsetX={-5}
+                            >
+                              <div className="w-20 flex flex-col bg-blue5 items-center rounded-lg text-white">
+                                <div
+                                  onClick={() => editMessage(msg.text, msg._id)}
+                                  className="cursor-pointer p-4 h-8 flex items-center hover:text-blue-400 delay-100"
+                                >
+                                  Edit
+                                </div>
+                                <div
+                                  onClick={() => deleteMessage(msg._id)}
+                                  className="cursor-pointer p-4 h-8 border-t border-t-blue-400 flex items-center hover:text-blue-400 delay-100"
+                                >
+                                  Delete
+                                </div>
+                              </div>
+                            </Popup>
+                          ) : (
+                            <div>{msg.text}</div>
+                          )
+                        ) : userInfo.id === msg.sender ? (
+                          <Popup
+                            trigger={
+                              <div className="flex items-center rounded-2xl p-1">
+                                <a
+                                  href={msg.url}
+                                  className="flex gap-1 items-center"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {isImage ? (
+                                    <FcImageFile size={30} />
+                                  ) : (
+                                    <FcDocument size={30} />
+                                  )}
+                                  <p className="font-semibold">
+                                    {msg.name + "." + fileExtension}
+                                  </p>
+                                </a>
+                              </div>
+                            }
+                            position={
+                              userInfo.id === msg.sender
+                                ? "left center"
+                                : "right center"
+                            }
+                            on="right-click"
+                            offsetX={userInfo.id !== msg.sender ? 15 : -5}
+                          >
+                            <div className="w-20 flex flex-col bg-blue5 items-center rounded-lg text-white">
+                              <div
+                                onClick={() => editFile(msg._id)}
+                                className="cursor-pointer p-4 h-8 flex items-center hover:text-blue-400 delay-100"
+                              >
+                                Edit
+                              </div>
+                              <div
+                                onClick={() => deleteMessage(msg._id)}
+                                className="cursor-pointer p-4 h-8 border-t border-t-blue-400 flex items-center hover:text-blue-400 delay-100"
+                              >
+                                Delete
+                              </div>
+                            </div>
+                          </Popup>
                         ) : (
                           <div className="flex items-center rounded-2xl p-1">
                             <a
@@ -266,12 +418,17 @@ const Chat = () => {
                   fontSize="14px"
                 />
                 <label className=" text-grey cursor-pointer rounded-sm">
-                  <input type="file" className="hidden" onChange={sendFile} />
+                  <input
+                    type="file"
+                    id="selectFile"
+                    className="hidden"
+                    onChange={sendFile}
+                  />
                   <GrAttachment size={22} />
                 </label>
                 <button
                   type="submit"
-                  className="bg-blue2 hover:bg-blue-600 focus:bg-blue-400 focus:outline-none active:bg-blue-700 text-white border border-transparent rounded-md shadow-sm py-2 px-3 inline-block font-medium text-sm"
+                  className="bg-blue2 hover:bg-blue-600 delay-150 focus:bg-blue-400 focus:outline-none active:bg-blue-700 text-white border border-transparent rounded-md shadow-sm py-2 px-3 inline-block font-medium text-sm"
                 >
                   <AiOutlineSend size={22} />
                 </button>

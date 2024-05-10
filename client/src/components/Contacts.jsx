@@ -11,9 +11,6 @@ const Contacts = ({id,selectedUserId,setSelectedUserId,userName,online}) => {
         (selectedUserId === id ? "bg-blue1" : "bg-blue4")
       }
     >
-      {/* {selectedUserId === id && (
-        <div className="bg-blue4 w-1 h-12 rounded-r-md"></div>
-      )} */}
       <div className="flex items-center gap-2 py-2 pl-4">
         <Avatar username={userName} id={id} online={online} />
         <span>{userName}</span>
