@@ -10,6 +10,15 @@
   width: 0;
 }
 
+/* Toast Message Style */
+:root{
+  --toastify-color-success:#60a5fa;
+  --toastify-text-align:left;
+}
+.Toastify__toast-body {
+  text-align: left; /* Important to override default styles */
+}
+
 /* Popup Feature */
 .popup-arrow {
   width: 20px;
