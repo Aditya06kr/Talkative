@@ -8,9 +8,9 @@ const secret = process.env.SECRET;
 const RegisterUser = async (req, res) => {
   const { username, password } = req.body;
   if (username.length < 6) {
-    res.json("Minimum length should be 6");
+    res.json("Username Length should be atleast 6");
   } else if (password.length == 0) {
-    res.json("Password should not be empty");
+    res.json("Password is required");
   } else {
     const existedUser = await User.findOne({ username });
     if (existedUser) {

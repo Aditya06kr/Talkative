@@ -12,12 +12,12 @@ const getPeople = async (req, res) => {
           sender: { $in: [user._id, ourUserId] },
           recipient: { $in: [user._id, ourUserId] },
         },
-        { updatedAt: 1, _id: 0 }
-      ).sort({ updatedAt: -1 });
+        { createdAt: 1, _id: 0 }
+      ).sort({ createdAt: -1 });
 
       return {
         ...user.toObject(),
-        updatedAt: additionalData?.updatedAt ? additionalData?.updatedAt : null,
+        createdAt: additionalData?.createdAt ? additionalData?.createdAt : null,
         isOnline: false,
       };
     })
