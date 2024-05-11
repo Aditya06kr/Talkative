@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 
 const salt = bcrypt.genSaltSync(10);
@@ -21,7 +21,7 @@ userSchema.pre("save", async function (next) {
   const user = this;
   if (!user.isModified('password')) return next();
   try {
-      const hashedPassword = await bcrypt.hash(user.password, salt);
+      const hashedPassword = bcrypt.hashSync(user.password, salt);
       user.password = hashedPassword;
       next();
   } catch (err) {

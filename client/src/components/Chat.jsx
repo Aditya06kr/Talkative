@@ -32,7 +32,7 @@ const Chat = () => {
   }, []);
 
   function connectToWs() {
-    const ws = new WebSocket("ws://localhost:4040");
+    const ws = new WebSocket("ws://localhost:8080");
     setWs(ws);
     ws.addEventListener("message", handleMessage);
     ws.addEventListener("close", () => {
@@ -55,9 +55,20 @@ const Chat = () => {
     const messageData = JSON.parse(e.data);
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
+      if(selectedUserId){
+        setSelectedUserId(selectedUserId);
+      }
     } else if ("_id" in messageData) {
       setConversation((prev) => [...prev, { ...messageData }]);
     }
+  }
+
+  function notifyChange() {
+    ws.send(
+      JSON.stringify({
+        type:"notification",
+      })
+    );
   }
 
   function sendMessage(e, file = "") {
@@ -70,6 +81,7 @@ const Chat = () => {
     } else {
       ws.send(
         JSON.stringify({
+          type:"message",
           recipient: selectedUserId,
           text: message,
           url: file.url,
@@ -121,6 +133,7 @@ const Chat = () => {
       setUserInfo(null);
       setWs(null);
       toast.success("Logout Successfully");
+      notifyChange();
     });
   }
 
@@ -140,6 +153,7 @@ const Chat = () => {
       });
     setEditId(null);
     setIsEditingMessage(false);
+    notifyChange();
   }
 
   function editMessage(msg, id) {
@@ -168,6 +182,7 @@ const Chat = () => {
 
     setIsEditingFile(false);
     setEditId(null);
+    notifyChange();
   }
 
   function editFile(id) {
