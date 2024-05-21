@@ -32,7 +32,7 @@ const RegisterOrLogin = () => {
 
   return (
     <>
-      <div className="loginDesign">
+      <div className="loginDesign flex justify-center w-full">
         <div className="container">
           <div className="top"></div>
           <div className="bottom"></div>

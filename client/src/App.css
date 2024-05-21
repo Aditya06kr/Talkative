@@ -31,22 +31,22 @@
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
 
+body {
+  min-height: 100vh;
+  background-color: #d1e1e6;
+  font-family: "Raleway", sans-serif;
+  text-align: center;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
 /* Login Design  */
 .loginDesign {
   *,
   *:before,
   *:after {
-    box-sizing: border-box;
-  }
-
-  body {
-    min-height: 100vh;
-    /* width: 20px !important;  */
-    font-family: "Raleway", sans-serif;
-    text-align: center;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
     box-sizing: border-box;
   }
 
