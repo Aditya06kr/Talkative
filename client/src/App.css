@@ -142,6 +142,7 @@ body {
       border-radius: 1px;
       border: 1px solid #ccc;
       font-family: inherit;
+      border-radius: 8px;
     }
     .inputBox:focus {
       outline: none;

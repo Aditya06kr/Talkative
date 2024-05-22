@@ -55,7 +55,7 @@ const Chat = () => {
     const messageData = JSON.parse(e.data);
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
-      if(selectedUserId){
+      if (selectedUserId) {
         setSelectedUserId(selectedUserId);
       }
     } else if ("_id" in messageData) {
@@ -66,7 +66,7 @@ const Chat = () => {
   function notifyChange() {
     ws.send(
       JSON.stringify({
-        type:"notification",
+        type: "notification",
       })
     );
   }
@@ -81,7 +81,7 @@ const Chat = () => {
     } else {
       ws.send(
         JSON.stringify({
-          type:"message",
+          type: "message",
           recipient: selectedUserId,
           text: message,
           url: file.url,
@@ -250,27 +250,28 @@ const Chat = () => {
           </button>
         </div>
         <div className="overflow-y-auto h-[425px] custom-scrollbar flex-1 m-2 py-1 ">
-          {allUsers.length>0 ? allUsers.map((user) => (
-            <Contacts
-              key={user._id}
-              id={user._id}
-              selectedUserId={selectedUserId}
-              setSelectedUserId={setSelectedUserId}
-              userName={user.username}
-              online={user.isOnline}
-            />
-          )): 
-          <h1 className="text-2xl text-blue-100">No Contacts</h1>
-          }
+          {allUsers.length > 0 ? (
+            allUsers.map((user) => (
+              <Contacts
+                key={user._id}
+                id={user._id}
+                selectedUserId={selectedUserId}
+                setSelectedUserId={setSelectedUserId}
+                userName={user.username}
+                online={user.isOnline}
+              />
+            ))
+          ) : (
+            <h1 className="text-2xl text-blue-100">No Contacts</h1>
+          )}
         </div>
       </div>
       <div className="bg-blue4 w-2/3 flex flex-col justify-end mx-2 rounded-xl">
-        {!selectedUserId && (
+        {!selectedUserId ? (
           <div className="m-auto text-slate-400 text-2xl">
             &larr; Start a Conversation
           </div>
-        )}
-        {selectedUserId && (
+        ) : (
           <>
             <div className="flex flex-col h-screen gap-2 ">
               <div className="bg-blue5 flex justify-between items-center text-white text-xl font-bold py-2 px-4">
