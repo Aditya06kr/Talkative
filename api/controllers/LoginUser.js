@@ -23,7 +23,11 @@ const LoginUser = async(req,res)=>{
       } else {
         res.json("Wrong Credentials");
       }
-    } else {
+    } 
+    else if(username.length===0 || password.length===0){
+      res.json("Empty Fields");
+    }
+    else {
       res.json("First Register Yourself");
     }
   } catch (err) {

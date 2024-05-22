@@ -7,7 +7,7 @@ const Contacts = ({id,selectedUserId,setSelectedUserId,userName,online}) => {
       key={id}
       onClick={() => setSelectedUserId(id)}
       className={
-        "border-b-2 border-blue5 text-white font-semibold flex items-center gap-2 cursor-pointer " +
+        "border-b border-blue5 text-white font-semibold flex items-center gap-2 cursor-pointer rounded-lg " +
         (selectedUserId === id ? "bg-blue1" : "bg-blue4")
       }
     >

@@ -249,8 +249,8 @@ const Chat = () => {
             <IoLogOutOutline size={25} />
           </button>
         </div>
-        <div className="overflow-y-auto h-[425px] custom-scrollbar flex-1 m-2 rounded-xl ">
-          {allUsers.map((user) => (
+        <div className="overflow-y-auto h-[425px] custom-scrollbar flex-1 m-2 py-1 ">
+          {allUsers.length>0 ? allUsers.map((user) => (
             <Contacts
               key={user._id}
               id={user._id}
@@ -259,7 +259,9 @@ const Chat = () => {
               userName={user.username}
               online={user.isOnline}
             />
-          ))}
+          )): 
+          <h1 className="text-2xl text-blue-100">No Contacts</h1>
+          }
         </div>
       </div>
       <div className="bg-blue4 w-2/3 flex flex-col justify-end mx-2 rounded-xl">
