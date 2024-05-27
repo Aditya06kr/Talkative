@@ -26,6 +26,7 @@ const Chat = () => {
   const [isEditingMessage, setIsEditingMessage] = useState(false);
   const [isEditingFile, setIsEditingFile] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [prevFile,setPrevFile]=useState(null);
   const messagesEndRef = useRef(null);
   useEffect(() => {
     connectToWs();
@@ -97,13 +98,14 @@ const Chat = () => {
 
     const data = new FormData();
     data.append("file", e.target.files[0]);
+    data.append("prevFile",prevFile);
 
     axios
       .post("/chat/uploads", data)
       .then((res) => {
         if (!isEditingFile) sendMessage(null, res.data);
         else {
-          handleEditFile(res.data);
+          handleEditFile(res.data); 
         }
       })
       .catch((err) => {
@@ -122,6 +124,7 @@ const Chat = () => {
         setConversation(res.data);
       });
   }
+
   useEffect(() => {
     if (selectedUserId) {
       GenerateMessages();
@@ -143,7 +146,7 @@ const Chat = () => {
       .then((res) => {
         if (res.status === 200) {
           GenerateMessages();
-        } else {
+        } else { 
           console.log("Editing Message Failed");
         }
       })
@@ -181,11 +184,13 @@ const Chat = () => {
       });
 
     setIsEditingFile(false);
+    setPrevFile(null);
     setEditId(null);
     notifyChange();
   }
 
-  function editFile(id) {
+  function editFile(url,id) {
+    setPrevFile(url);
     setEditId(id);
     setIsEditingFile(true);
     document.getElementById("selectFile").click();
@@ -204,6 +209,22 @@ const Chat = () => {
       .catch((err) => {
         console.log("Error in Client Side in Deleting a Message");
         console.log("Error Deleting message:", err);
+      });
+  }
+
+  function deleteFile(url,deleteId) {
+    axios
+      .delete("/chat/deleteFile/" + deleteId,{ params: { url } })
+      .then((res) => {
+        if (res.status === 200) {
+          GenerateMessages();
+        } else {
+          console.log("Error in Deleting File");
+        }
+      })
+      .catch((err) => {
+        console.log("Error in Client Side in Deleting a File");
+        console.log("Error Deleting file:", err);
       });
   }
 
@@ -383,13 +404,13 @@ const Chat = () => {
                           >
                             <div className="w-20 flex flex-col bg-blue5 items-center rounded-lg text-white">
                               <div
-                                onClick={() => editFile(msg._id)}
+                                onClick={() => editFile(msg.url,msg._id)}
                                 className="cursor-pointer p-4 h-8 flex items-center hover:text-blue-400 delay-100"
                               >
                                 Edit
                               </div>
                               <div
-                                onClick={() => deleteMessage(msg._id)}
+                                onClick={() => deleteFile(msg.url,msg._id)}
                                 className="cursor-pointer p-4 h-8 border-t border-t-blue-400 flex items-center hover:text-blue-400 delay-100"
                               >
                                 Delete
