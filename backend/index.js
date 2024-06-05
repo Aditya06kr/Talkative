@@ -20,6 +20,7 @@ app.use(
   })
 );
 
+// Connect DataBase
 try {
   connectDb();
 } catch (err) {
@@ -27,11 +28,11 @@ try {
 }
 
 // User components
-import userRouter from "./routers/Authentication.js";
+import userRouter from "./routes/Authentication.js";
 app.use("/api/v1/user", userRouter);
 
 // Chat components
-import chatRouter from "./routers/Chat.js";
+import chatRouter from "./routes/Chat.js";
 app.use("/api/v1/chat", chatRouter);
 
 // Web Socket Logic
