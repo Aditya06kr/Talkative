@@ -15,7 +15,7 @@ const Logo = ({setSelectedUserId}) => {
           clipRule="evenodd"
         />
       </svg>
-      ChitChat
+      Talkative
     </div>
   );
 };
