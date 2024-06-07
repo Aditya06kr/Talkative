@@ -13,7 +13,7 @@ const router = Router();
 
 router.route("/messages/:userId").get(getMessages);
 router.route("/people").get(getPeople);
-router.post("/uploads", upload.single("file"), uploadFile);
+router.route("/uploads").post(upload.single("file"), uploadFile);
 router.route("/editMessage/:editId").put(editMessage);
 router.route("/deleteMessage/:deleteId").delete(deleteMessage);
 router.route("/deleteFile/:deleteId").delete(deleteFile);
