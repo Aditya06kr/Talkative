@@ -81,16 +81,30 @@ const LoginUser = async (req, res) => {
 };
 
 const Logout = async (req, res) => {
-  res.cookie("token", "",{ httpOnly: true, secure: true }).json("ok");
+  res
+    .clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+    })
+    .json("ok");
 };
 
 const getProfile = async (req, res) => {
   const token = req.cookies?.token;
   if (token) {
     jwt.verify(token, secret, {}, (err, info) => {
-      if(err && err.name === "TokenExpiredError"){
-        res.cookie("token", "", { expires: new Date(0) });
-        return res.status(401).json({ message: 'Token expired and deleted', error: err });
+      if (err && err.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .clearCookie(
+            "token",
+            {
+              httpOnly: true,
+              secure: true,
+            },
+            { expires: new Date(0) }
+          )
+          .json("Token expired and deleted");
       }
       if (err) throw err;
       res.json(info);
