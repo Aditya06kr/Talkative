@@ -359,7 +359,7 @@ const Chat = () => {
                       <div
                         key={msg._id}
                         className={
-                          "w-fit max-w-2xl p-1 px-3 m-2 text-white rounded-2xl " +
+                          "max-w-2xl p-1 px-3 m-2 text-white text-left rounded-2xl " +
                           (userInfo.id === msg.sender
                             ? "bg-blue2 float-right"
                             : "bg-blue3 float-left")
