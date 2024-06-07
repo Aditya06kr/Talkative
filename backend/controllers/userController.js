@@ -25,13 +25,16 @@ const RegisterUser = async (req, res) => {
         jwt.sign(
           { username, id: createdUser._id },
           secret,
-          {},
+          { expiresIn: process.env.EXPIRY },
           (err, token) => {
             if (err) throw err;
-            res.cookie("token", token).status(201).json({
-              username,
-              id: createdUser._id,
-            });
+            res
+              .cookie("token", token, { httpOnly: true, secure: true })
+              .status(201)
+              .json({
+                username,
+                id: createdUser._id,
+              });
           }
         );
       } catch (err) {
@@ -49,13 +52,21 @@ const LoginUser = async (req, res) => {
     if (foundUser) {
       const passOk = bcrypt.compareSync(password, foundUser.password);
       if (passOk) {
-        jwt.sign({ username, id: foundUser._id }, secret, {}, (err, token) => {
-          if (err) throw err;
-          res.cookie("token", token).status(201).json({
-            username,
-            id: foundUser._id,
-          });
-        });
+        jwt.sign(
+          { username, id: foundUser._id },
+          secret,
+          { expiresIn: process.env.EXPIRY },
+          (err, token) => {
+            if (err) throw err;
+            res
+              .cookie("token", token, { httpOnly: true, secure: true })
+              .status(201)
+              .json({
+                username,
+                id: foundUser._id,
+              });
+          }
+        );
       } else {
         res.json("Wrong Credentials");
       }
@@ -70,13 +81,17 @@ const LoginUser = async (req, res) => {
 };
 
 const Logout = async (req, res) => {
-  res.cookie("token", "").json("ok");
+  res.cookie("token", "",{ httpOnly: true, secure: true }).json("ok");
 };
 
 const getProfile = async (req, res) => {
   const token = req.cookies?.token;
   if (token) {
     jwt.verify(token, secret, {}, (err, info) => {
+      if(err && err.name === "TokenExpiredError"){
+        res.cookie("token", "", { expires: new Date(0) });
+        return res.status(401).json({ message: 'Token expired and deleted', error: err });
+      }
       if (err) throw err;
       res.json(info);
     });
