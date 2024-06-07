@@ -71,8 +71,8 @@ The project structure is organized as follows:
 
 ## ScreenShots
 
-![LoginPage](https://github.com/Aditya06kr/Talkative/assets/LoginPage.png)
-![ChatPage](https://github.com/Aditya06kr/Talkative/assets/ChatPage.png)
+![LoginPage](https://github.com/Aditya06kr/Talkative/blob/main/assets/LoginPage.png)
+![ChatPage](https://github.com/Aditya06kr/Talkative/blob/main/assets/ChatPage.png)
 
 ## Acknowledgements
 
