@@ -25,9 +25,14 @@ const RegisterOrLogin = () => {
   }
 
   useEffect(() => {
-    axios.get("/user/profile").then((res) => {
-      setUserInfo(res.data);
-    });
+    axios
+      .get("/user/profile")
+      .then((res) => {
+        setUserInfo(res.data);
+      })
+      .catch((err) => {
+        console.log("Yet to Login :- ", err);
+      });
   }, [userInfo]);
 
   return (
