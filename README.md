@@ -69,6 +69,11 @@ The project structure is organized as follows:
 - `frontend`: Contains the React frontend code.
 - `backend`: Contains the Node.js,Express and Socket.io configuration.
 
+## ScreenShots
+
+![LoginPage](https://github.com/Aditya06kr/Talkative/assets/LoginPage.png)
+![ChatPage](https://github.com/Aditya06kr/Talkative/assets/ChatPage.png)
+
 ## Acknowledgements
 
 - [Socket.IO](https://socket.io/)
