@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import express from "express";
 import Message from "./models/Message.js";
 import cors from "cors";
@@ -6,7 +5,6 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { WebSocketServer } from "ws";
 import connectDb from "./db/index.js";
-dotenv.config();
 
 const secret = process.env.SECRET;
 
