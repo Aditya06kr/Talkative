@@ -35,7 +35,7 @@ app.use("/api/v1/chat", chatRouter);
 
 // Web Socket Logic
 try {
-  const server = app.listen(process.env.API_PORT);
+  const server = app.listen(process.env.PORT);
   const wss = new WebSocketServer({ server });
   wss.on("connection", (connection, req) => {
     function notifyAboutOnlinePeople() {
