@@ -17,6 +17,8 @@ import Popup from "reactjs-popup";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 
+const socketUrl=import.meta.env.VITE_KEY;
+
 const Chat = () => {
   const [ws, setWs] = useState(null);
   const [open, setOpen] = useState(false);
@@ -36,7 +38,7 @@ const Chat = () => {
   }, []);
 
   function connectToWs() {
-    const ws = new WebSocket("ws://localhost:8080");
+    const ws = new WebSocket(`${socketUrl}`);
     setWs(ws);
     ws.addEventListener("message", handleMessage);
     ws.addEventListener("close", () => {
