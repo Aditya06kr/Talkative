@@ -17,7 +17,7 @@ import Popup from "reactjs-popup";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const socketUrl=import.meta.env.VITE_KEY;
+const socketUrl=import.meta.env.VITE_SOCKET_URL;
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
