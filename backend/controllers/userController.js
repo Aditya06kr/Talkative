@@ -27,7 +27,11 @@ const RegisterUser = async (req, res) => {
           (err, token) => {
             if (err) throw err;
             res
-              .cookie("token", token, { httpOnly: true, secure: true })
+              .cookie("token", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "None",
+              })
               .status(201)
               .json({
                 username,
@@ -57,7 +61,11 @@ const LoginUser = async (req, res) => {
           (err, token) => {
             if (err) throw err;
             res
-              .cookie("token", token, { httpOnly: true, secure: true })
+              .cookie("token", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "None",
+              })
               .status(201)
               .json({
                 username,
@@ -83,6 +91,7 @@ const Logout = async (req, res) => {
     .clearCookie("token", {
       httpOnly: true,
       secure: true,
+      sameSite: "None",
     })
     .json("ok");
 };
@@ -99,6 +108,7 @@ const getProfile = async (req, res) => {
             {
               httpOnly: true,
               secure: true,
+              sameSite: "None",
             },
             { expires: new Date(0) }
           )
