@@ -53,6 +53,7 @@ This repository contains the source code for Talkative, a real-time chat applica
 
    ````plaintext
    VITE_KEY=http://localhost:8080/api/v1
+   VITE_SOCKET_URL=ws://localhost:8080
 
 5. Start the frontend and backend server:
 
