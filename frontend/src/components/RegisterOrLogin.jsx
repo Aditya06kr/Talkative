@@ -89,7 +89,7 @@ const RegisterOrLogin = () => {
                   >
                     <g
                       id="Calque_2"
-                      class="btn--svg__border--left js-discover-left-border"
+                      className="btn--svg__border--left js-discover-left-border"
                     >
                       <path
                         fill="none"
@@ -101,7 +101,7 @@ const RegisterOrLogin = () => {
                     </g>
                     <g
                       id="Calque_3"
-                      class="btn--svg__border--right js-discover-right-border"
+                      className="btn--svg__border--right js-discover-right-border"
                     >
                       <path
                         fill="none"
