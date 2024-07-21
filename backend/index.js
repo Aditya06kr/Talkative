@@ -33,6 +33,10 @@ app.use("/api/v1/user", userRouter);
 import chatRouter from "./routes/Chat.js";
 app.use("/api/v1/chat", chatRouter);
 
+app.get("/api/v1/ping", (req, res) => {
+  res.json("pong");
+});
+
 // Web Socket Logic
 try {
   const server = app.listen(process.env.PORT);
@@ -81,10 +85,9 @@ try {
     }
     connection.on("message", async (message) => {
       const messageString = JSON.parse(message.toString());
-      if(messageString.type==="notification"){
+      if (messageString.type === "notification") {
         notifyAboutOnlinePeople();
-      }
-      else{
+      } else {
         const { recipient, text, url, name } = messageString;
         if (recipient && (text || url)) {
           const messageDoc = await Message.create({
